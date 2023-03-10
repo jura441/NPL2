@@ -6,8 +6,8 @@ namespace NPLesson2Server
 {
     public partial class Form1 : Form
     {
-        Socket? server;
-        IPEndPoint? point;
+        Socket server;
+        IPEndPoint point;
         public Form1()
         {
             InitializeComponent();
@@ -20,35 +20,23 @@ namespace NPLesson2Server
 
         private void btn_startServer_Click(object sender, EventArgs e)
         {
-            tmr_refreshConnection.Start();
+            if (server == null)
+                return;
             server.Bind(point);
             server.Listen(100);
+            tmr_refreshConnection.Start();            
         }
 
         private void btn_stopServer_Click(object sender, EventArgs e)
         {
-            tmr_refreshConnection.Stop();  
-            
+            tmr_refreshConnection.Stop();            
         }
 
         private void tmr_refreshConnection_Tick(object sender, EventArgs e)
         {
             try
             {                
-                // проверка на пустоту принимаемых Socket
-                server.BeginAccept((IAsyncResult result) => {
-                    if (result != null)
-                    {
-                        Socket clientsocket = server.EndAccept(result);                    
-                        //rtb_clients.Text += clientsocket.RemoteEndPoint.ToString();
-                        clientsocket.Send(Encoding.UTF8.GetBytes("Успешное подключение."));
-                       // 
-                    }
-                }, server);
-                /*ArraySegment<byte> buffer = new ArraySegment<byte>();
-                client.SendAsync(buffer, SocketFlags.None);
-                Thread.Sleep(100);*/
-
+                server.BeginAccept(ServerAcceptDelegate, server);
             }
             catch (Exception ex)
             {
@@ -60,5 +48,17 @@ namespace NPLesson2Server
         {
             server.Close();
         }
+
+        void ServerAcceptDelegate(IAsyncResult result)
+        {
+            if (result != null)
+            {
+                Socket serv = (Socket)result.AsyncState;
+                Socket clientsocket = serv.EndAccept(result);
+                clientsocket.Send(Encoding.UTF8.GetBytes("Успешное подключение."));
+               
+            }
+        }
+
     }
 }
