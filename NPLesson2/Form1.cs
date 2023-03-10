@@ -11,12 +11,13 @@ namespace NPLesson2
         public Form1()
         {
             InitializeComponent();
+            
         }
 
         private void btn_connectServer_Click(object sender, EventArgs e)
         {
             try
-            { 
+            {
                 client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
                 point = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 80);
                 client.BeginConnect(point, (IAsyncResult result) => {
@@ -60,6 +61,27 @@ namespace NPLesson2
         private void btn_sendMessage_Click(object sender, EventArgs e)
         {
 
+            try
+            {
+                client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+                point = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 80);
+                client.BeginConnect(point, (IAsyncResult result) => {
+                    Socket clientAsync = (Socket)result.AsyncState;
+                    if (clientAsync.Connected)
+                    {
+                        byte[] buffer = Encoding.UTF8.GetBytes(tb_message.Text);
+                        ArraySegment<byte> segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
+                        client.SendAsync(segment, SocketFlags.None);
+                    }
+                    client.EndConnect(result);
+
+                }, client);                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            
         }
 
         private void tb_message_TextChanged(object sender, EventArgs e)
