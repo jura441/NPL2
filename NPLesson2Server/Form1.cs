@@ -56,7 +56,9 @@ namespace NPLesson2Server
                 Socket serv = (Socket)result.AsyncState;
                 Socket clientsocket = serv.EndAccept(result);
                 clientsocket.Send(Encoding.UTF8.GetBytes("Успешное подключение."));
-               
+                clientsocket.Shutdown(SocketShutdown.Send);
+                clientsocket.Close();
+                server.BeginAccept(ServerAcceptDelegate, serv);
             }
         }
 

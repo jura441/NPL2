@@ -6,8 +6,8 @@ namespace NPLesson2
 {
     public partial class Form1 : Form
     {
-        Socket? client;
-        IPEndPoint? point;
+        Socket client;
+        IPEndPoint point;
         public Form1()
         {
             InitializeComponent();
@@ -20,18 +20,20 @@ namespace NPLesson2
                 client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
                 point = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 80);
                 client.BeginConnect(point, (IAsyncResult result) => {
-                    if (client.Connected)
+                    Socket clientAsync = (Socket)result.AsyncState;
+                    if (clientAsync.Connected)
                     {
                         byte[] buffer = new byte[1024];
-                        int answerServer = client.Receive(buffer);
+                        int answerServer = clientAsync.Receive(buffer);
                         while (answerServer > 0)
                         {
                             rtb_chat.Text += Encoding.UTF8.GetString(buffer);
-                            answerServer = client.Receive(buffer);
+                            answerServer = clientAsync.Receive(buffer);
                         }
                     }
                     client.EndConnect(result);
-                },client);
+
+                }, client);
                 
             }
             catch(Exception ex) 
