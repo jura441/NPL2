@@ -22,5 +22,10 @@ namespace Contacts
             _email = email;
             _phone = phone;
         }
+
+        public override string ToString()
+        {
+            return Name + "|" + _email + "|" + _password + "|" + _phone;
+        }
     }
 }

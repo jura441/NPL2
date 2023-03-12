@@ -20,7 +20,7 @@ namespace NPLesson2
             Thread thread = Thread.CurrentThread;
             thread.Join(500);
             if (command.ServerIsConnected())
-                rtb_chat.Text = "Подключение успешно";
+                rtb_chat.Text = "Подключение успешно\n";
             /*try
             {
                 
@@ -62,7 +62,8 @@ namespace NPLesson2
 
         private void btn_sendMessage_Click(object sender, EventArgs e)
         {
-
+            if (command.ServerIsConnected())
+                command.SendMessage("Contact|"+contact.ToString());
             /*try
             {
                 client = contact.Socket;
@@ -105,7 +106,7 @@ namespace NPLesson2
         {
             contact = new ClientContacts(
             new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP),
-            "Ilya",
+            "Ilya"+DateTime.Now.Millisecond.ToString(),
             "123456",
             "iluxailuxa@gmail.com",
             "+79287604894"
@@ -148,7 +149,15 @@ namespace NPLesson2
             }
             return _answer == "Успешное подключение." ? true : false;
         }
-
+        public void SendMessage(string message)
+        {
+            if (server.Connected)
+            {
+                byte[] buffer = Encoding.UTF8.GetBytes(message);
+                ArraySegment<byte> segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
+                client.SendAsync(segment, SocketFlags.None);
+            }
+        }
         public bool ServerIsConnected()
         {
             return server != null ? true : false;

@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <Compile Update="Form1.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Compile>
   </ItemGroup>
 

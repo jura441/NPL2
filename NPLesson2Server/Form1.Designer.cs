@@ -33,11 +33,12 @@
             this.btn_stopServer = new System.Windows.Forms.Button();
             this.rtb_clients = new System.Windows.Forms.RichTextBox();
             this.tmr_refreshConnection = new System.Windows.Forms.Timer(this.components);
+            this.btn_updateClientsList = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_startServer
             // 
-            this.btn_startServer.Location = new System.Drawing.Point(231, 12);
+            this.btn_startServer.Location = new System.Drawing.Point(48, 12);
             this.btn_startServer.Name = "btn_startServer";
             this.btn_startServer.Size = new System.Drawing.Size(139, 23);
             this.btn_startServer.TabIndex = 0;
@@ -47,7 +48,7 @@
             // 
             // btn_stopServer
             // 
-            this.btn_stopServer.Location = new System.Drawing.Point(411, 12);
+            this.btn_stopServer.Location = new System.Drawing.Point(244, 12);
             this.btn_stopServer.Name = "btn_stopServer";
             this.btn_stopServer.Size = new System.Drawing.Size(164, 23);
             this.btn_stopServer.TabIndex = 1;
@@ -66,14 +67,25 @@
             // 
             // tmr_refreshConnection
             // 
-            this.tmr_refreshConnection.Interval = 1000;
+            this.tmr_refreshConnection.Interval = 3000;
             this.tmr_refreshConnection.Tick += new System.EventHandler(this.tmr_refreshConnection_Tick);
+            // 
+            // btn_updateClientsList
+            // 
+            this.btn_updateClientsList.Location = new System.Drawing.Point(471, 11);
+            this.btn_updateClientsList.Name = "btn_updateClientsList";
+            this.btn_updateClientsList.Size = new System.Drawing.Size(221, 23);
+            this.btn_updateClientsList.TabIndex = 3;
+            this.btn_updateClientsList.Text = "Показать клиентов";
+            this.btn_updateClientsList.UseVisualStyleBackColor = true;
+            this.btn_updateClientsList.Click += new System.EventHandler(this.btn_updateClientsList_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.btn_updateClientsList);
             this.Controls.Add(this.rtb_clients);
             this.Controls.Add(this.btn_stopServer);
             this.Controls.Add(this.btn_startServer);
@@ -91,5 +103,6 @@
         private Button btn_stopServer;
         private RichTextBox rtb_clients;
         private System.Windows.Forms.Timer tmr_refreshConnection;
+        private Button btn_updateClientsList;
     }
 }
