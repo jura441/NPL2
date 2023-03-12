@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Contacts;
 
 namespace NPLesson2Server
 {
@@ -21,7 +22,7 @@ namespace NPLesson2Server
         private void btn_startServer_Click(object sender, EventArgs e)
         {
             if (server != null)
-            { 
+            {
                 server.Bind(point);
                 server.Listen(100);
                 tmr_refreshConnection.Start();
@@ -40,7 +41,7 @@ namespace NPLesson2Server
             {
                 MessageBox.Show(ex.Message);
             }
-                     
+
         }
 
         private void tmr_refreshConnection_Tick(object sender, EventArgs e)
@@ -72,24 +73,26 @@ namespace NPLesson2Server
             if (result != null)
             {
                 Socket serv = (Socket)result.AsyncState;
-                Socket clientsocket = serv.EndAccept(result);
-                clientsocket.Send(Encoding.UTF8.GetBytes("Успешное подключение."));
+                if (serv != null) { 
+                    Socket clientsocket = serv.EndAccept(result);
+                    clientsocket.Send(Encoding.UTF8.GetBytes("Успешное подключение."));
 
-                IAsyncResult updateText = rtb_clients.BeginInvoke(RichTextBoxOutputDelegate, clientsocket.RemoteEndPoint.ToString());
-                rtb_clients.EndInvoke(updateText);
-
-                byte[] buffer = new byte[1024];
-                ArraySegment<byte> segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
-                Task<int> answer = clientsocket.ReceiveAsync(segment, SocketFlags.None);                
-                if(answer.IsCompleted) 
-                {
-                    updateText = rtb_clients.BeginInvoke(RichTextBoxOutputDelegate, Encoding.UTF8.GetString(segment));
+                    IAsyncResult updateText = rtb_clients.BeginInvoke(RichTextBoxOutputDelegate, clientsocket.RemoteEndPoint.ToString());
                     rtb_clients.EndInvoke(updateText);
-                }                   
-                
 
-                clientsocket.Shutdown(SocketShutdown.Send);
-                clientsocket.Close();               
+                    byte[] buffer = new byte[1024];
+                    ArraySegment<byte> segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
+                    Task<int> answer = clientsocket.ReceiveAsync(segment, SocketFlags.None);
+                    if (answer.IsCompleted)
+                    {
+                        updateText = rtb_clients.BeginInvoke(RichTextBoxOutputDelegate, Encoding.UTF8.GetString(segment));
+                        rtb_clients.EndInvoke(updateText);
+                    }
+
+
+                    clientsocket.Shutdown(SocketShutdown.Send);
+                    clientsocket.Close();
+                }
 
             }
         }
