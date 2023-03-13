@@ -20,33 +20,7 @@ namespace NPLesson2
             Thread thread = Thread.CurrentThread;
             thread.Join(500);
             if (command.ServerIsConnected())
-                rtb_chat.Text = "Подключение успешно\n";
-            /*try
-            {
-                
-                client.BeginConnect(point, (IAsyncResult result) =>
-                {
-                    server = (Socket)result.AsyncState;
-                    if (server.Connected)
-                    {
-                        byte[] buffer = new byte[1024];
-                        int answerServer = server.Receive(buffer);
-                        while (answerServer > 0)
-                        {
-                            IAsyncResult updateText = rtb_chat.BeginInvoke(RichTextBoxOutputDelegate, Encoding.UTF8.GetString(buffer));
-                            rtb_chat.EndInvoke(updateText);
-                            answerServer = server.Receive(buffer);
-                        }
-                    }
-                    client.EndConnect(result);
-
-                }, client);
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }*/
+                rtb_chat.Text = "Подключение успешно\n";     
 
         }
 
@@ -63,28 +37,7 @@ namespace NPLesson2
         private void btn_sendMessage_Click(object sender, EventArgs e)
         {
             if (command.ServerIsConnected())
-                command.SendMessage("Contact|"+contact.ToString());
-            /*try
-            {
-                client = contact.Socket;
-                point = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 80);
-                client.BeginConnect(point, (IAsyncResult result) =>
-                {
-                    server = (Socket)result.AsyncState;
-                    if (server.Connected)
-                    {
-                        byte[] buffer = Encoding.UTF8.GetBytes(tb_message.Text);
-                        ArraySegment<byte> segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
-                        client.SendAsync(segment, SocketFlags.None);
-                    }
-                    client.EndConnect(result);
-
-                }, client);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }*/
+                command.SendMessage("Contact|"+contact.SendToNetwork());   
 
         }
 

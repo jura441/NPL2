@@ -58,10 +58,10 @@ namespace NPLesson2Server
                     Task<int> answer = client.ReceiveAsync(segment, SocketFlags.None);
                     if (answer.IsCompleted)
                     {
-                         string text = Encoding.UTF8.GetString(segment);
+                        string text = Encoding.UTF8.GetString(segment);
                         IAsyncResult updateText = rtb_clients.BeginInvoke(RichTextBoxOutputDelegate, text);
                         rtb_clients.EndInvoke(updateText);
-                        if (text.Contains("Contact"))
+                        if (text.StartsWith("Contact"))
                         {
                             string[] contactStrings = text.Split("|");
                             contacts.Add(new ClientContacts(client, contactStrings[1], contactStrings[3], contactStrings[2], contactStrings[4]));                           
