@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Contacts;
+using ClientCommands;
+using ServerCommands;
 
 namespace NPLesson2Server
 {
@@ -9,8 +11,8 @@ namespace NPLesson2Server
     {
         Socket server;
         IPEndPoint point;
-        List<Socket> clientSockets = new List<Socket>();
-        List<ClientContacts> contacts = new List<ClientContacts>();
+        ServerClientCommand command = new ServerClientCommand();
+
         public Form1()
         {
             InitializeComponent();
@@ -36,7 +38,7 @@ namespace NPLesson2Server
             try
             {
                 if (server != null)
-                    tmr_refreshConnection.Stop();
+                tmr_refreshConnection.Stop();
                 server.Close();
             }
             catch (Exception ex)
@@ -48,31 +50,15 @@ namespace NPLesson2Server
 
         private void tmr_refreshConnection_Tick(object sender, EventArgs e)
         {
-            try
+            if (command.GetClientSocket(server))
             {
-                server.BeginAccept(ServerAcceptDelegate, server);
-                byte[] buffer = new byte[1024];
-                ArraySegment<byte> segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
-                foreach (Socket client in clientSockets)
+                if(command.clientSockets.Count > 0)
                 {
-                    Task<int> answer = client.ReceiveAsync(segment, SocketFlags.None);
-                    if (answer.IsCompleted)
+                    foreach(Socket client in command.clientSockets)
                     {
-                        string text = Encoding.UTF8.GetString(segment);
-                        IAsyncResult updateText = rtb_clients.BeginInvoke(RichTextBoxOutputDelegate, text);
-                        rtb_clients.EndInvoke(updateText);
-                        if (text.StartsWith("Contact"))
-                        {
-                            string[] contactStrings = text.Split("|");
-                            contacts.Add(new ClientContacts(client, contactStrings[1], contactStrings[3], contactStrings[2], contactStrings[4]));                           
-                        }
+                        command.CommandManage(command.ReciveMessage(client), client);
                     }
                 }
-                
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
             }
         }
 
@@ -87,24 +73,6 @@ namespace NPLesson2Server
                 MessageBox.Show(ex.Message);
             }
         }
-
-        void ServerAcceptDelegate(IAsyncResult result)
-        {
-            if (result != null)
-            {
-                Socket serv = (Socket)result.AsyncState;
-                if (serv != null) { 
-                    Socket clientsocket = serv.EndAccept(result);
-                    clientSockets.Add(clientsocket);
-                    clientsocket.Send(Encoding.UTF8.GetBytes("Успешное подключение."));
-
-                    IAsyncResult updateText = rtb_clients.BeginInvoke(RichTextBoxOutputDelegate, clientsocket.RemoteEndPoint.ToString());
-                    rtb_clients.EndInvoke(updateText);
-                }
-
-            }
-        }
-
         void RichTextBoxOutputDelegate(object obj)
         {
             rtb_clients.Text += (string)obj;
@@ -112,10 +80,12 @@ namespace NPLesson2Server
 
         private void btn_updateClientsList_Click(object sender, EventArgs e)
         {
-            foreach (ClientContacts client in contacts)
+            foreach (ClientContacts client in command.contacts)
             {
                 rtb_clients.Text += client.ToString();
             }
         }
     }
+
+   
 }
