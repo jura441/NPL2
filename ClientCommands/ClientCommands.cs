@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
-
+using System.Threading;
 
 namespace ClientCommands
 {
@@ -17,33 +17,38 @@ namespace ClientCommands
         public string _answer = "";
 
         string error = "";
-        public bool ConnectServer(IPEndPoint point, Socket clientSocket)
+        
+        byte[] buffer = new byte[1024];
+        public async Task ConnectServer(IPEndPoint point, Socket clientSocket)
         {
-            try
+            await Task.Run(async () =>
             {
-                client = clientSocket;
-                client.BeginConnect(point, (IAsyncResult result) =>
-                {
-                    server = (Socket)result.AsyncState;
-                    if (server.Connected)
-                    {
 
-                        byte[] buffer = new byte[1024];
-                        ArraySegment<byte> segment = new ArraySegment<byte>(buffer, 0, buffer.Length);
-                        Task<int> message = server.ReceiveAsync(segment, SocketFlags.None);
-                        if (message.IsCompleted)
-                        { 
-                            _answer += Encoding.UTF8.GetString(buffer);
+                try
+                {
+                    client = clientSocket;
+                    Mutex mutex = new Mutex();
+                    await Task.Run(async () =>
+                    client.BeginConnect(point, (IAsyncResult result) =>
+                    {
+                        server = (Socket)result.AsyncState;
+                        if (server.Connected)
+                        {
+
+                            Task.Run(() => server.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReciveMessage, server);
                         }
-                        
-                    }
-                }, client);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-            }
-            return _answer == "Успешное подключение." ? true : false;
+                    }, client)
+                );
+                    mutex.WaitOne(1000);
+                    mutex.ReleaseMutex();
+                    mutex.Close();
+
+                 }
+                catch (Exception ex)
+                {
+                    error = ex.Message;
+                }
+            });
         }
         public void SendMessage(string message)
         {
@@ -58,5 +63,14 @@ namespace ClientCommands
         {
             return server != null ? true : false;
         }
+
+        void ReciveMessage(IAsyncResult result)
+        {
+            Socket server = (Socket)result.AsyncState;
+            server.EndReceive(result);
+            _answer = Encoding.UTF8.GetString(buffer);
+
+        }
     }
+
 }
